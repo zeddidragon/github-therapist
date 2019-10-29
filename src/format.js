@@ -7,30 +7,35 @@ const colors = [
   'red',
   'yellow',
   'magenta',
-  'gray',
+  'white',
 ]
 
-const bgs = [
-  'bgCyan',
-  'bgBlue',
-  'bgGreen',
-  'bgRed',
-  'bgYellow',
-  'bgMagenta',
-]
+const bgs = colors
 
 function label(label) {
-  const method = bgs[Math.floor(parseInt(label.color, 16) / (0xffff * 16 * 2.5))]
-    || 'bgWhite'
-  return kleur[method]().black(` ${label.name} `)
+  const method = bgs[hashCode(label.name.toLowerCase()) % bgs.length]
+  return kleur[method](`[${label.name}]`)
+}
+
+function hashCode(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+     hash = str.charCodeAt(i)
+  }
+  return hash;
 }
 
 function user(user) {
-  const color = colors[user.id % colors.length]
-  return kleur[color](user.login)
+  const color = colors[hashCode(user.login.toLowerCase()) % colors.length]
+  return kleur[color](`@${user.login}`)
+}
+
+function time(stamp) {
+  return stamp
 }
 
 module.exports = {
   label,
   user,
+  time,
 }

@@ -11,13 +11,11 @@ async function parseCli() {
 
   const args = process.argv.slice(2)
 
-  if(!args.length) {
-    return actions.list()
-  }
-
   if(args[0] === 'alias') {
     return actions.alias(args.slice(1))
   }
+
+  return actions.issues(args)
 }
 
 readConfig()
