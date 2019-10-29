@@ -1,4 +1,5 @@
 const kleur = require('kleur')
+const { cyan, dim, white } = kleur
 
 const colors = [
   'cyan',
@@ -34,8 +35,40 @@ function time(stamp) {
   return stamp
 }
 
+function issueRow(row) {
+  const labels = row.labels.map(label).join(' ')
+  return `${cyan(row.html_url || row.url)} ${labels && '\n  ' + labels}
+  ${dim('By:')} ${user(row.user)}\
+  ${dim(`To:`)} ${row.assignees.map(user).join(', ')}\
+  ${dim('At: ' + time(row.created_at))}
+  ${row.title}`
+}
+
+function body(body) {
+  return (
+    body
+      .replace(/(@.*) (commented on )\[(.*)\]\(https.*\)/gm, (m, ...groups) => {
+        return `${dim('By:')} ${groups[0]}`
+      })
+      .replace(/@\w+/gm, match => user({ login: match.slice(1) }))
+      .replace(/\*\*.+\*\*/gm, match => white().bold(match))
+  )
+}
+
+function comment(comment) {
+  const created = comment.created_at
+  return [
+    `${dim('#' + comment.id)} ${user(comment.user)}\
+    ${dim(time(created))}`,
+    body(comment.body),
+  ].map(row => '    ' + row).join('\n')
+}
+
 module.exports = {
   label,
   user,
   time,
+  issueRow,
+  body,
+  comment,
 }

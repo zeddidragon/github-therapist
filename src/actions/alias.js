@@ -21,6 +21,9 @@ const reserved = [
   'help',
   'list',
   'show',
+  'n',
+  'c',
+  'C',
 ]
 function add(symbol, repo) {
   if(reserved.includes(symbol)) {

@@ -1,45 +1,16 @@
 const path = require('path')
-const { cyan, dim, white } = require('kleur')
-const { label, user, time } = require('../format')
+const { cyan, dim } = require('kleur')
+const { label, user, time, issueRow, body, comment } = require('../format')
 const { get } = require('../http')
 const { config } = require('../config')
-
-function formatRow(row) {
-  const labels = row.labels.map(label).join(' ')
-  return `${cyan(row.html_url || row.url)} ${labels && '\n  ' + labels}
-  ${dim('By:')} ${user(row.user)}\
-  ${dim(`To:`)} ${row.assignees.map(user).join(', ')}\
-  ${dim('At: ' + time(row.created_at))}
-  ${row.title}`
-}
 
 async function list(repo) {
   const url = repo ? path.join('repos', repo, 'issues') : '/issues'
   const response = await get(url)
-  console.log(response.map(formatRow).join('\n\n'))
+  console.log(response.map(issueRow).join('\n\n'))
   if(!response.length) {
     console.log(`No issues found!`)
   }
-}
-
-function formatBody(body) {
-  return (
-    body
-      .replace(/(@.*) (commented on )\[(.*)\]\(https.*\)/gm, (m, ...groups) => {
-        return `${dim('By:')} ${groups[0]}`
-      })
-      .replace(/@\w+/gm, match => user({ login: match.slice(1) }))
-      .replace(/\*\*.+\*\*/gm, match => white().bold(match))
-  )
-}
-
-function formatComment(comment) {
-  const created = comment.created_at
-  return [
-    `${dim('#' + comment.id)} ${user(comment.user)}\
-    ${dim(time(created))}`,
-    formatBody(comment.body),
-  ].map(row => '    ' + row).join('\n')
 }
 
 async function show(repo, issue) {
@@ -53,7 +24,6 @@ async function show(repo, issue) {
     created_at: created,
     updated_at: updated,
     html_url: url,
-    body,
   } = response
   const labels = response.labels.map(label).join(' ')
   const output = [
@@ -62,9 +32,9 @@ async function show(repo, issue) {
     updated && created !== updated
       ? dim(`Created: ${created}    Updated: ${updated}`)
       : dim(time(created)),
-    formatBody(response.body),
+    body(response.body),
   ].filter(v => v).join('\n') + comments
-    .map(formatComment)
+    .map(comment)
     .join('\n\n')
   console.log(output)
 }

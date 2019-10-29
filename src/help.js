@@ -6,6 +6,8 @@ function help() {
 ${name} ${version}
 ${description}
 
+Usage: ${bin} [n|c|C|O]
+
 Examples:
   # List all open issues assigned to you in all repos
   ${bin}
