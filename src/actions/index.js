@@ -1,7 +1,7 @@
-const list = require('./list')
+const issues = require('./issues')
 const alias =  require('./alias')
 
 module.exports = {
-  list: list,
+  issues: issues,
   alias: alias,
 }
