@@ -1,4 +1,5 @@
-#Github Therapist
+Github Therapist
+================
 
 WIP 
 
@@ -6,7 +7,7 @@ When done, will let you list issues, view individual issues, comment and close t
 
 Features will be added whenever the lack of them annoys me or you make a pull request.
 
-# Token
+## Token
 
 The token is stored in ~/.github-therapist
 
