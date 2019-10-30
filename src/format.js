@@ -1,6 +1,6 @@
 const kleur = require('kleur')
 const { flags } = require('./config')
-const { cyan, dim, white } = kleur
+const { cyan, dim, white, red } = kleur
 
 const colors = [
   'cyan',
@@ -15,8 +15,9 @@ const colors = [
 const bgs = colors
 
 function label(label) {
-  const method = bgs[hashCode(label.name.toLowerCase()) % bgs.length]
-  return kleur[method](`[${label.name}]`)
+  const name = label.name || label
+  const method = bgs[hashCode(name.toLowerCase()) % bgs.length]
+  return kleur[method](`[${name}]`)
 }
 
 function hashCode(str) {
@@ -28,8 +29,9 @@ function hashCode(str) {
 }
 
 function user(user) {
-  const color = colors[hashCode(user.login.toLowerCase()) % colors.length]
-  return kleur[color](`@${user.login}`)
+  const name = user.login || user
+  const color = colors[hashCode(name.toLowerCase()) % colors.length]
+  return kleur[color](`@${name}`)
 }
 
 function time(stamp) {
@@ -40,7 +42,7 @@ function issueRow(row) {
   const labels = row.labels.map(label).join(' ')
   return `${cyan(row.html_url || row.url)} ${labels && '\n  ' + labels}
   ${dim('By:')} ${user(row.user)}\
-  ${dim(`To:`)} ${row.assignees.map(user).join(', ')}\
+  ${dim(`To:`)} ${row.assignees.map(user).join(', ') || dim('<unassigned>')}\
   ${dim('At: ' + time(row.created_at))}
   ${row.title}${flags.body ? '\n' + body(row.body) : ''}`
 }
@@ -62,14 +64,23 @@ function issue(response) {
     updated_at: updated,
     html_url: url,
   } = response
-  const labels = response.labels.map(label).join(' ')
+  const labels = (response.labels || []).map(label).join(', ')
+  const assigned = (response.assignees || []).map(user).join(', ')
   return [
-    cyan(url),
-    labels,
+    url && cyan(url),
+    `# ${white().bold(response.title)}`,
+    [
+      response.state === 'closed' && red('Closed'),
+      labels,
+    ].filter(v => v).join('  '),
+    [
+      response.user && `${dim('By:')} ${user(response.user)}`,
+      assigned && `${dim('To:')} ${assigned}`,
+    ].filter(v => v).join('  '),
     updated && created !== updated
       ? dim(`Created: ${created}    Updated: ${updated}`)
-      : dim(time(created)),
-    body(response.body),
+      : created && dim(time(created)),
+    response.body && body(response.body),
   ].filter(v => v).join('\n')
 }
 

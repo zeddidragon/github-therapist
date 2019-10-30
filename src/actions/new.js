@@ -1,58 +1,36 @@
-const fs = require('fs')
 const path = require('path')
-const { spawn } = require('child_process')
-const { dim, white, cyan } = require('kleur')
+const { dim, cyan } = require('kleur')
 const prompts = require('prompts')
 const raise = require('../error')
 const { issue: formatIssue } = require('../format')
 const { post } = require('../http')
 const { resolve } = require('./alias')
-const { newIssue: help } = require('./help')
+const { editIssue } = require('./editor')
 const { flags } = require('../config')
 
 async function newIssue(args) {
-  if(flags.editor) {
-    if(args.length < 1 || args.length > 2) {
-      console.error('Wrong amount of arguments, should be 1 or 2: ', args)
-      return help(1)
-    }
-    const body = await new Promise(resolve => {
-      const editor = process.env.EDITOR || 'vi';
-
-      const filePath = '/tmp/github-therapist.md'
-
-      const title = args[args.length - 1]
-      fs.writeFileSync(filePath, `[//] # (Comment body for issue: "${title}")\n\n`)
-      const child = spawn(editor, [filePath], {
-          stdio: 'inherit'
-      });
-
-      child.on('exit', async () => {
-        const body = fs.readFileSync(filePath, 'utf8')
-          .split('\n')
-          .filter(line => !/^\[\/\/\] #/.test(line))
-          .join('\n')
-          .trim()
-        resolve(body)
-      });
-    })
-    if(!body) raise('No message provided, aborting...')
-    args.push(body)
+  const issue = {
+    title: args[1] || flags.title,
+    body: args[2] || flags.message || '',
+    assignees: flags.assign || [],
+    labels: flags.label || [],
+  }
+  if(flags.editor || !issue.title) {
+    Object.assign(issue, await editIssue(issue))
+    console.log(issue)
+    delete issue.state
+    if(!issue.assignees.length) delete issue.assignees
+    if(!issue.labels.length) delete issue.labels
+    if(!issue.body) delete issue.body
+    if(!issue.milestone) delete issue.milestone
+  }
+  if(!issue.title) {
+    raise('Title not provided!')
   }
 
-  if(args.length < 2 || args.length > 3) {
-    console.error('Wrong amount of  arguments, should be 2 or 3: ', args)
-    return help(1)
-  }
-  const [repo, title, body] = args.length === 3
-    ? [resolve(args[0]), args[1], args[2]]
-    : [resolve('default'), ...args]
+  const repo = resolve(args[0] || 'default')
 
-  console.log(`${dim('In repo:')} ${cyan(repo)}
-${white(title)}
-${white(title.replace(/./g, '='))}
-${(body.length < 78 ? body : body.slice(0, 75) + '...').split('\n').join(' ')}
-  `)
+  console.log(`${dim('In repo:')} ${cyan(repo)}\n${formatIssue(issue)}`)
   const { ok } = await prompts({
     type: 'confirm',
     name: 'ok',
@@ -64,13 +42,7 @@ ${(body.length < 78 ? body : body.slice(0, 75) + '...').split('\n').join(' ')}
     process.exit(0)
   }
 
-  const response = await post(path.join('repos', repo, 'issues'), {
-    title,
-    body,
-    assignees: flags.assign || [],
-    labels: flags.label || [],
-  })
-  
+  const response = await post(path.join('repos', repo, 'issues'), issue)
   console.log(formatIssue(response))
 }
 

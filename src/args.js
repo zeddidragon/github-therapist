@@ -5,6 +5,8 @@ const flagMap = {
   b: 'body',
   a: 'assign',
   e: 'editor',
+  t: 'title',
+  m: 'message',
   l: 'label',
 }
 
@@ -27,7 +29,6 @@ function processArgs(args = process.argv.slice(2)) {
       const singleFlags = arg.slice(1).split('').map(f => {
         return flagMap[f] || f
       })
-      console.log({ singleFlags })
       for(const f of singleFlags.slice(0, -1)) {
         if(!validFlags.includes(f)) {
           raise(`Unknown flag: ${f}`)

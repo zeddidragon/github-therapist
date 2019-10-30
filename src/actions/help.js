@@ -77,7 +77,7 @@ Example:
 function newIssue(code = 0) {
   const { bin } = pkg
   console.log(`
-Usage: ${bin} n[ew] [<repo>] <title> <body>|-e
+Usage: ${bin} n[ew] [<repo>] [<title>] [<body>]
 Example:
   $ ${bin} new bucks "Refactor the factory bean generator helper" "Needs refactoring"
   $ ${bin} new bucks "Adjust the flamboogle" -e
@@ -85,6 +85,8 @@ Example:
 
 Flags:
   -e, --editor          opens your editor to write the body of the issue/comment
+  -t, --title <title>   set title of issue
+  -m, --message <msg>   set message of issue
   -a, --assign <user>   assign a user when creating issue
   -l, --label <label>   add label when creating issue`)
   process.exit(code)
