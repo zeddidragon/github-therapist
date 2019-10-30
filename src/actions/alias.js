@@ -1,5 +1,5 @@
 const { yellow } = require('kleur')
-const { config, package, addConfig } = require('../config')
+const { config, addConfig } = require('../config')
 const { aliases: help } = require('./help')
 const raise = require('../error')
 
@@ -36,9 +36,11 @@ The following tokens are reserved: \n  ${reserved.join(', ')}`)
   }
 
   const aliases = config.aliases || {}
-  if(symbol === 'clear-default') {
-    delete aliases.default
+  if(symbol === 'clear') {
+    if(!repo) repo = 'default'
+    delete aliases[repo]
     addConfig({ aliases })
+    return console.log(`Cleared alias ${repo}`)
   }
 
   if(!repo) {

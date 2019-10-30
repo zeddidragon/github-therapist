@@ -56,6 +56,23 @@ function body(body) {
   )
 }
 
+function issue(response) {
+  const {
+    created_at: created,
+    updated_at: updated,
+    html_url: url,
+  } = response
+  const labels = response.labels.map(label).join(' ')
+  return [
+    cyan(url),
+    labels,
+    updated && created !== updated
+      ? dim(`Created: ${created}    Updated: ${updated}`)
+      : dim(time(created)),
+    body(response.body),
+  ].filter(v => v).join('\n')
+}
+
 function comment(comment) {
   const created = comment.created_at
   return [
@@ -70,6 +87,7 @@ module.exports = {
   user,
   time,
   issueRow,
+  issue,
   body,
   comment,
 }

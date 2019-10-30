@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const actions = require('./actions')
 
-const { readConfig, flags } = require('./config')
+const { readConfig } = require('./config')
 const { getToken } = require('./auth')
 const { apiHeaders } = require('./http')
 const processArgs = require('./args')

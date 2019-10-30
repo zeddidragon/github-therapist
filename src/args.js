@@ -5,10 +5,12 @@ const flagMap = {
   b: 'body',
   a: 'assign',
   e: 'editor',
+  l: 'label',
 }
 
 const flagTypes = {
   assign: Array,
+  label: Array,
 }
 
 const validFlags = Object.values(flagMap)

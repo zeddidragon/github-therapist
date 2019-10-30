@@ -3,7 +3,7 @@ const os = require('os')
 const path = require('path')
 const configPath = path.resolve(os.homedir(), '.github-therapist.json')
 
-const package = {}
+const pkg = {}
 const config = {}
 const flags = {}
 
@@ -11,9 +11,10 @@ function readConfig() {
   try {
     const content = fs.readFileSync(configPath, 'utf8')
     Object.assign(config, JSON.parse(content))
-  } catch {}
+  } catch(err) {
+  }
   const json = require('../package.json')
-  Object.assign(package, json, {
+  Object.assign(pkg, json, {
     bin: Object.keys(json.bin)[0],
   })
 }
@@ -28,6 +29,6 @@ module.exports = {
   readConfig,
   addConfig,
   config,
-  package,
+  pkg,
   flags,
 }

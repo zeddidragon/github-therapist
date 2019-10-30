@@ -1,6 +1,5 @@
 const path = require('path')
-const { cyan, dim } = require('kleur')
-const { label, user, time, issueRow, body, comment } = require('../format')
+const { issue: formatIssue, issueRow, comment } = require('../format')
 const { get } = require('../http')
 const { resolve } = require('./alias')
 
@@ -20,22 +19,7 @@ async function show(repo, issue) {
     get(path.join('repos', repo, 'issues', issue, 'comments')),
   ])
 
-  const {
-    created_at: created,
-    updated_at: updated,
-    html_url: url,
-  } = response
-  const labels = response.labels.map(label).join(' ')
-  const output = [
-    cyan(url),
-    labels,
-    updated && created !== updated
-      ? dim(`Created: ${created}    Updated: ${updated}`)
-      : dim(time(created)),
-    body(response.body),
-  ].filter(v => v).join('\n') + comments
-    .map(comment)
-    .join('\n\n')
+  const output = formatIssue(response) + comments.map(comment).join('\n\n')
   console.log(output)
 }
 

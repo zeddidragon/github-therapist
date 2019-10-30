@@ -1,4 +1,4 @@
-const { package } = require('../config')
+const { pkg } = require('../config')
 
 const helps = {
   a: aliases,
@@ -8,7 +8,7 @@ const helps = {
 }
 
 function help(code = 0) {
-  const { bin, name, version, description } = package
+  const { bin, name, version, description } = pkg
   if(helps[code]) return helps[code]()
 
   console.log(`
@@ -36,6 +36,8 @@ Examples:
 Flags:
   -b, --body    include issue body in the list
   -e, --editor  opens your editor to write the body of the issue/comment
+  -a, --assign  assign a user when creating issue
+  -l, --label   add label when creating issue
 
 Commands:
   h, help       This help message
@@ -50,7 +52,7 @@ Commands:
 }
 
 function aliases(code = 0) {
-  const { bin } = package
+  const { bin } = pkg
   console.log(`
 Usage: ${bin} a[lias] [<alias> <full repo>]
 Example:
@@ -68,20 +70,23 @@ Example:
   $ ${bin} 1500
     > https://github.com/microbucks/corporate-project/issues/1500
     > ...
-  $ ${bin} a clear-default
-  `)
+  $ ${bin} a clear default`)
   process.exit(code)
 }
 
 function newIssue(code = 0) {
-  const { bin } = package
+  const { bin } = pkg
   console.log(`
 Usage: ${bin} n[ew] [<repo>] <title> <body>|-e
 Example:
   $ ${bin} new bucks "Refactor the factory bean generator helper" "Needs refactoring"
   $ ${bin} new bucks "Adjust the flamboogle" -e
   Opens up an editor to fill in the body
-  `)
+
+Flags:
+  -e, --editor          opens your editor to write the body of the issue/comment
+  -a, --assign <user>   assign a user when creating issue
+  -l, --label <label>   add label when creating issue`)
   process.exit(code)
 }
 

@@ -1,10 +1,10 @@
-const path = require('path')
 const fs = require('fs')
+const path = require('path')
 const { spawn } = require('child_process')
 const { dim, white, cyan } = require('kleur')
 const prompts = require('prompts')
 const raise = require('../error')
-const { label, user, time, body } = require('../format')
+const { issue: formatIssue } = require('../format')
 const { post } = require('../http')
 const { resolve } = require('./alias')
 const { newIssue: help } = require('./help')
@@ -16,7 +16,7 @@ async function newIssue(args) {
       console.error('Wrong amount of arguments, should be 1 or 2: ', args)
       return help(1)
     }
-    const body = await new Promise((resolve, reject) => {
+    const body = await new Promise(resolve => {
       const editor = process.env.EDITOR || 'vi';
 
       const filePath = '/tmp/github-therapist.md'
@@ -27,7 +27,7 @@ async function newIssue(args) {
           stdio: 'inherit'
       });
 
-      child.on('exit', async (e, code) => {
+      child.on('exit', async () => {
         const body = fs.readFileSync(filePath, 'utf8')
           .split('\n')
           .filter(line => !/^\[\/\/\] #/.test(line))
@@ -59,8 +59,19 @@ ${(body.length < 78 ? body : body.slice(0, 75) + '...').split('\n').join(' ')}
     message: 'Is this correct?',
     initial: true,
   })
-  if(!ok) process.exit(0)
-  console.log('sent')
+  if(!ok) {
+    console.error('Aborted')
+    process.exit(0)
+  }
+
+  const response = await post(path.join('repos', repo, 'issues'), {
+    title,
+    body,
+    assignees: flags.assign || [],
+    labels: flags.label || [],
+  })
+  
+  console.log(formatIssue(response))
 }
 
 module.exports = newIssue
