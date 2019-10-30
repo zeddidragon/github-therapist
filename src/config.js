@@ -3,8 +3,9 @@ const os = require('os')
 const path = require('path')
 const configPath = path.resolve(os.homedir(), '.github-therapist.json')
 
-const config = {}
 const package = {}
+const config = {}
+const flags = {}
 
 function readConfig() {
   try {
@@ -28,4 +29,5 @@ module.exports = {
   addConfig,
   config,
   package,
+  flags,
 }

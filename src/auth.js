@@ -1,5 +1,6 @@
 const os = require('os')
 const prompts = require('prompts')
+const raise = require('./error')
 const { config, addConfig } = require('./config')
 const { post } = require('./http')
 
@@ -56,8 +57,7 @@ async function authenticate(user, pass, finger, otp) {
   if(response.message === 'Must specify two-factor authentication OTP code.') {
     return authenticate(user, pass, finger, true)
   } else if(response.message) {
-    console.error(`API error: ${response.message}`)
-    process.exit(1)
+    raise(`API error: ${response.message}`)
   }
 
   return response.token

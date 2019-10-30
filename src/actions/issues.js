@@ -2,7 +2,7 @@ const path = require('path')
 const { cyan, dim } = require('kleur')
 const { label, user, time, issueRow, body, comment } = require('../format')
 const { get } = require('../http')
-const { config } = require('../config')
+const { resolve } = require('./alias')
 
 async function list(repo) {
   const url = repo ? path.join('repos', repo, 'issues') : '/issues'
@@ -40,18 +40,12 @@ async function show(repo, issue) {
 }
 
 function resolveArgs([repo, issue]) {
-  const { aliases } = config
   if(!issue && /^\d+$/.test(repo)) {
     issue = repo
-    repo = aliases.default
+    repo = 'default'
   }
 
-  if(aliases[repo]) repo = aliases[repo]
-
-  if(!repo) {
-    console.error('Unable to resolve: ', { repo, issue })
-    process.exit()
-  }
+  repo = resolve(repo)
   return [repo, issue]
 }
 

@@ -1,4 +1,5 @@
 const kleur = require('kleur')
+const { flags } = require('./config')
 const { cyan, dim, white } = kleur
 
 const colors = [
@@ -41,7 +42,7 @@ function issueRow(row) {
   ${dim('By:')} ${user(row.user)}\
   ${dim(`To:`)} ${row.assignees.map(user).join(', ')}\
   ${dim('At: ' + time(row.created_at))}
-  ${row.title}`
+  ${row.title}${flags.body ? '\n' + body(row.body) : ''}`
 }
 
 function body(body) {
