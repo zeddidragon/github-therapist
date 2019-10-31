@@ -40,6 +40,28 @@ Commands:
   R, reopen     Reopen an issue
 ```
 
+## Aliases
+Before regular use, you should set up aliases for your relevant repos.
+```
+Usage: gth a[lias] [<alias> <full repo>|clear <alias>]
+Example:
+  $ gth alias bucks microbucks/corporate-project
+  $ gth alias
+    > bucks => microbucks/corporate-project
+  $ gth bucks 1500
+    > https://github.com/microbucks/corporate-project/issues/1500
+    > Move the flim-flam button 2px to the right
+    > =======================================================
+    > [Urgent], [Back-End]
+    > By: @qa  To: @You, @Devops, @TeamLeader
+    > ...
+  $ gth a default bucks
+  $ gth 1500
+    > https://github.com/microbucks/corporate-project/issues/1500
+    > ...
+  $ gth a clear default
+```
+
 ## New issue
 ```
 Usage: gth n[ew] [<repo>] [<title>] [<body>]
