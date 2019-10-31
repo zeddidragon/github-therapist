@@ -31,6 +31,8 @@ async function get(path, query={}, opts={}) {
 
 async function post(path, body={}, opts={}) {
   const url = new URL(path, apiUrl)
+  const skipOkCheck = !!opts.skipOkCheck
+  if(skipOkCheck) delete opts.skipOkCheck
   const response = await fetch(url, {
     body: JSON.stringify({ ...body }),
     method: 'POST',
@@ -41,7 +43,7 @@ async function post(path, body={}, opts={}) {
     }
   })
 
-  if(!response.ok) {
+  if(!skipOkCheck && !response.ok) {
     console.error('Problem trying to fetch:')
     console.error(url.href, { body })
     console.error(await response.json().then(data => data.message))

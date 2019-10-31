@@ -52,7 +52,7 @@ async function authenticate(user, pass, finger, otp) {
     note_url: 'https://github.com/zeddidragon/github-therapist',
     scopes: ['repo'],
     fingerprint: finger,
-  }, { headers })
+  }, { headers, skipOkCheck: true })
 
   if(/OTP code/.test(response.message)) {
     return authenticate(user, pass, finger, true)
