@@ -3,7 +3,7 @@
   "bin": {
     "gth": "src/index.js"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Helps you with your GH issues",
   "main": "src/index.js",
   "scripts": {
@@ -19,5 +19,14 @@
     "kleur": "^3.0.3",
     "node-fetch": "^2.6.0",
     "prompts": "^2.2.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeddidragon/github-therapist.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zeddidragon/github-therapist/issues"
+  },
+  "homepage": "https://github.com/zeddidragon/github-therapist#readme"
 }
