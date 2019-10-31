@@ -24,6 +24,9 @@ async function parseCli() {
     case 'new':
     case 'n':
       return actions.new(cmdArgs)
+    case 'edit':
+    case 'e':
+      return actions.edit(cmdArgs)
   }
 
   return actions.issues(args)

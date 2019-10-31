@@ -19,6 +19,12 @@ async function get(path, query={}, opts={}) {
       ...(opts.headers || {}),
     }
   })
+  if(!response.ok) {
+    console.error('Problem trying to fetch:')
+    console.error(url.href)
+    console.error(await response.json().then(data => data.message))
+    process.exit(1)
+  }
 
   return response.json()
 }
@@ -34,6 +40,13 @@ async function post(path, body={}, opts={}) {
       ...(opts.headers || {}),
     }
   })
+
+  if(!response.ok) {
+    console.error('Problem trying to fetch:')
+    console.error(url.href, { body })
+    console.error(await response.json().then(data => data.message))
+    process.exit(1)
+  }
 
   return response.json()
 }

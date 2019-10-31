@@ -86,7 +86,7 @@ Example:
 Flags:
   -e, --editor          opens your editor to write the body of the issue/comment
   -t, --title <title>   set title of issue
-  -m, --message <msg>   set message of issue
+  -b, --body <body>     set body of issue
   -a, --assign <user>   assign a user when creating issue
   -l, --label <label>   add label when creating issue`)
   process.exit(code)

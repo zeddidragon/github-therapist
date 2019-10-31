@@ -3,8 +3,8 @@ const { dim, cyan } = require('kleur')
 const prompts = require('prompts')
 const raise = require('../error')
 const { issue: formatIssue } = require('../format')
-const { post } = require('../http')
-const { resolve } = require('./alias')
+const { get, post } = require('../http')
+const { resolve, resolveArgs } = require('./alias')
 const { editIssue } = require('./editor')
 const { flags } = require('../config')
 
@@ -45,5 +45,46 @@ async function newIssue(args) {
   const response = await post(path.join('repos', repo, 'issues'), issue)
   console.log(formatIssue(response))
 }
+
+async function patchIssue(args) {
+  const [repo, issue] = resolveArgs(args)
+  const url = path.join('repos', repo, 'issues', issue)
+  const original = await get(url)
+  const editable = {
+    title: original.title,
+    body: original.body,
+    user: original.user.login,
+    milestone: original.milestone || '',
+    assignees: original.labels.map(a => a.login),
+    labels: original.labels.map(l => l.name),
+    state: original.state,
+  }
+  var assignedFromCli = false
+  for(const flag of ['title', 'body', 'milestone']) {
+    const v = flags[flag]
+    if(!v) continue
+    editable[flag] = v
+    assignedFromCli = true
+  }
+  for(const [flag, prop] of [['assign', 'assignees'], ['label', 'labels']]) {
+    const v = flags[flag]
+    if(!v) continue
+    editable[prop] = Array.from(new Set(editable.prop.concat(v)))
+    assignedFromCli = true
+  }
+  if(flags.close || flags.open) {
+    editable.state = flags.close ? 'closed' : 'open'
+    assignedFromCli = true
+  }
+  if(flags.editor || !assignedFromCli) {
+    Object.assign(editable, await editIssue(editable))
+  }
+  if(!editable.milestone) editable.milestone = null
+
+  const response = await post(url, editable, { method: 'PATCH' })
+  console.log(formatIssue(response))
+}
+
+newIssue.editIssue = patchIssue
 
 module.exports = newIssue

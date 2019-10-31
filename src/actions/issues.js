@@ -1,7 +1,7 @@
 const path = require('path')
 const { issue: formatIssue, issueRow, comment } = require('../format')
 const { get } = require('../http')
-const { resolve } = require('./alias')
+const { resolveArgs } = require('./alias')
 
 async function list(repo) {
   const url = repo ? path.join('repos', repo, 'issues') : '/issues'
@@ -21,16 +21,6 @@ async function show(repo, issue) {
 
   const output = formatIssue(response) + comments.map(comment).join('\n\n')
   console.log(output)
-}
-
-function resolveArgs([repo, issue]) {
-  if(!issue && /^\d+$/.test(repo)) {
-    issue = repo
-    repo = 'default'
-  }
-
-  repo = resolve(repo)
-  return [repo, issue]
 }
 
 function issues(args) {

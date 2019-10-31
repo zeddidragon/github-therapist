@@ -11,7 +11,8 @@ async function editIssue(issue) {
   const text = `# ${issue.title || 'Title'}
 ${issue.body || ''}
 [//] # (Enter your issue message. Lines beginning with \`[//] #\` will be stripped)
-[//] # (The first line is the issue's title)
+[//] # (The first line is the issue's title)\
+${issue.user ? `\n[//] # Created by @${issue.user}\n` : ''}\
 ${propsHeader}
 state = ${issue.state || 'open'}
 milestone = ${issue.milestone || ''}

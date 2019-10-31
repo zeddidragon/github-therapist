@@ -2,17 +2,21 @@ const raise = require('./error')
 const { flags } = require('./config')
 
 const flagMap = {
-  b: 'body',
-  a: 'assign',
   e: 'editor',
   t: 'title',
-  m: 'message',
+  b: 'body',
+  a: 'assign',
   l: 'label',
+  m: 'milestone',
+  C: 'close',
+  O: 'open',
 }
 
 const flagTypes = {
   assign: Array,
   label: Array,
+  body: String,
+  milestone: Number,
 }
 
 const validFlags = Object.values(flagMap)
@@ -33,7 +37,6 @@ function processArgs(args = process.argv.slice(2)) {
         if(!validFlags.includes(f)) {
           raise(`Unknown flag: ${f}`)
         }
-        console.log({ f })
         flags[f] = true
       }
       flag = singleFlags.pop()
@@ -52,6 +55,8 @@ function processArgs(args = process.argv.slice(2)) {
 
     const type = flagTypes[flag]
 
+    if(flag === 'open') delete flags.close
+    if(flag === 'close') delete flags.open
     if(!type) {
       flags[flag] = true
       continue
@@ -67,7 +72,7 @@ function processArgs(args = process.argv.slice(2)) {
     } else if(type === Array) {
       flags[flag] = [value]
     } else {
-      flags[flag] = value
+      flags[flag] = type(value)
     }
   }
 

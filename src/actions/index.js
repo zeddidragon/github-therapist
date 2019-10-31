@@ -7,5 +7,6 @@ module.exports = {
   issues: issues,
   alias: alias,
   new: newIssue,
+  edit: newIssue.editIssue,
   help: help,
 }
