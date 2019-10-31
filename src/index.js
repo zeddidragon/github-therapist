@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+const kleur = require('kleur')
+kleur.enabled = process.stdout.isTTY
+
 const actions = require('./actions')
 
 const { readConfig, flags } = require('./config')
