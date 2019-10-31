@@ -60,8 +60,12 @@ function alias(args) {
 }
 
 function resolve(repo) {
-  if(/\//.test(repo)) return repo
   const aliases = config.aliases || {}
+  if(repo === 'default' && !aliases.default) {
+    raise('No default repo set')
+  }
+  if(repo === 'default') repo = aliases.default
+  if(/\//.test(repo)) return repo
 
   if(!aliases[repo]) {
     raise(`No repo found for alias:  ${repo}`)

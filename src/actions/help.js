@@ -1,10 +1,16 @@
 const { pkg } = require('../config')
-
 const helps = {
   a: aliases,
   aliases: aliases,
   n: newIssue,
   new: newIssue,
+  e: editIssue,
+  edit: editIssue,
+  h: help,
+  c: newComment,
+  comment: newComment,
+  m: editComment,
+  amend: editComment,
 }
 
 function help(code = 0) {
@@ -78,6 +84,8 @@ function newIssue(code = 0) {
   const { bin } = pkg
   console.log(`
 Usage: ${bin} n[ew] [<repo>] [<title>] [<body>]
+  If you don't specify a title, your editor opens.
+
 Example:
   $ ${bin} new bucks "Refactor the factory bean generator helper" "Needs refactoring"
   $ ${bin} new bucks "Adjust the flamboogle" -e
@@ -88,7 +96,69 @@ Flags:
   -t, --title <title>   set title of issue
   -b, --body <body>     set body of issue
   -a, --assign <user>   assign a user when creating issue
-  -l, --label <label>   add label when creating issue`)
+  -l, --label <label>   add label when creating issue
+  -m, --milestone <id>  set milestone id`)
+  process.exit(code)
+}
+
+function editIssue(code = 0) {
+  const { bin } = pkg
+  console.log(`
+Usage: ${bin} e[dit] [<repo>] <issue> [<title>] [<body>]
+  If you don't specify any changes, your editor opens.
+
+Example:
+  $ ${bin} edit bucks 1313 "Changed title"
+  $ ${bin} edit bucks 1313
+  Opens up an editor to fill in the body
+
+Flags:
+  -e, --editor          opens your editor to write the body of the issue/comment
+  -t, --title <title>   set title of issue
+  -b, --body <body>     set body of issue
+  -a, --assign <user>   assign a user when creating issue
+  -l, --label <label>   add label when creating issue
+  -m, --milestone <id>  set milestone id
+  -C, --close           close issue, -O will override it
+  -O, --open            reopen issue, -C will override it`)
+  process.exit(code)
+}
+
+function newComment(code = 0) {
+  const { bin } = pkg
+  console.log(`
+Usage: ${bin} c[comment] [<repo>] <issue> [<body>]
+  If you don't specify any body, your editor opens.
+
+Example:
+  $ ${bin} comment bucks 1313 "Cannot reproduce"
+  $ ${bin} comment bucks 1313
+  Opens up an editor to fill in the body
+
+Flags:
+  -e, --editor          opens your editor to write the body of the issue/comment
+  -b, --body <body>     set body of issue
+  -C, --close           close issue, -O will override it
+  -O, --open            reopen issue, -C will override it`)
+  process.exit(code)
+}
+
+function editComment(code = 0) {
+  const { bin } = pkg
+  console.log(`
+Usage: ${bin} [a]m[end] [<repo>] <issue> [<body>]
+  If you don't specify any body, your editor opens.
+
+Example:
+  $ ${bin} comment bucks 1313 "Cannot reproduce"
+  $ ${bin} comment bucks 1313
+  Opens up an editor to fill in the body
+
+Flags:
+  -e, --editor          opens your editor to write the body of the issue/comment
+  -b, --body <body>     set body of issue
+  -C, --close           close issue, -O will override it
+  -O, --open            reopen issue, -C will override it`)
   process.exit(code)
 }
 
@@ -97,6 +167,9 @@ Object.assign(help, {
   issues: help,
   aliases,
   newIssue,
+  editIssue,
+  newComment,
+  editComment,
 })
 
 module.exports = help
