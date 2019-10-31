@@ -73,7 +73,7 @@ async function patchComment(args) {
 
 async function close(args) {
   flags.close = true
-  if(args.length || flags.body) return newComment(args)
+  if(args.length > 2 || flags.body) return newComment(args)
 
   const [repo, issue] = resolveArgs(args)
   return maybeClose(repo, issue)
