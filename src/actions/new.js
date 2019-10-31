@@ -46,11 +46,9 @@ async function newIssue(args) {
   console.log(formatIssue(response))
 }
 
-async function patchIssue(args) {
-  const [repo, issue] = resolveArgs(args)
-  const url = path.join('repos', repo, 'issues', issue)
+async function getOriginal(url) {
   const original = await get(url)
-  const editable = {
+  return {
     title: original.title,
     body: original.body,
     user: original.user.login,
@@ -59,29 +57,34 @@ async function patchIssue(args) {
     labels: original.labels.map(l => l.name),
     state: original.state,
   }
-  var assignedFromCli = false
+}
+
+async function patchIssue(args) {
+  const [repo, issue] = resolveArgs(args)
+  const url = path.join('repos', repo, 'issues', issue)
+  var original = null
+  const edits = {}
   for(const flag of ['title', 'body', 'milestone']) {
     const v = flags[flag]
     if(!v) continue
-    editable[flag] = v
-    assignedFromCli = true
+    edits[flag] = v
   }
   for(const [flag, prop] of [['assign', 'assignees'], ['label', 'labels']]) {
     const v = flags[flag]
     if(!v) continue
-    editable[prop] = Array.from(new Set(editable.prop.concat(v)))
-    assignedFromCli = true
+    if(!original) original = await getOriginal(url)
+    edits[prop] = Array.from(new Set(original.prop.concat(v)))
   }
   if(flags.close || flags.open) {
-    editable.state = flags.close ? 'closed' : 'open'
-    assignedFromCli = true
+    edits.state = flags.close ? 'closed' : 'open'
   }
-  if(flags.editor || !assignedFromCli) {
-    Object.assign(editable, await editIssue(editable))
+  if(flags.editor || !Object.keys(edits).length) {
+    if(!original) original = await getOriginal(url)
+    Object.assign(edits, await editIssue(Object.assign(original, edits)))
+    if(!edits.milestone) edits.milestone = null
   }
-  if(!editable.milestone) editable.milestone = null
 
-  const response = await post(url, editable, { method: 'PATCH' })
+  const response = await post(url, edits, { method: 'PATCH' })
   console.log(formatIssue(response))
 }
 
