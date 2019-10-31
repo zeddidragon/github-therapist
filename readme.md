@@ -3,7 +3,16 @@ Github Therapist
 
 Small program to manage your github issues.
 
-# General
+## Installation
+`npm i -g github-therapist`
+or
+```
+  git clone git@github.com:zeddidragon/github-therapist.git`
+  cd github-therapist
+  npm link
+```
+
+## General
 
 ```
 Usage: gth [<flags>] [<command>] [<repo>] [<command arguments>]
