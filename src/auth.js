@@ -54,7 +54,7 @@ async function authenticate(user, pass, finger, otp) {
     fingerprint: finger,
   }, { headers })
 
-  if(response.message === 'Must specify two-factor authentication OTP code.') {
+  if(/OTP code/.test(response.message)) {
     return authenticate(user, pass, finger, true)
   } else if(response.message) {
     raise(`API error: ${response.message}`)
