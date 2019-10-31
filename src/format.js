@@ -17,6 +17,7 @@ const bgs = colors
 function label(label) {
   const name = label.name || label
   const method = bgs[hashCode(name.toLowerCase()) % bgs.length]
+
   return kleur[method](`[${name}]`)
 }
 
@@ -85,12 +86,22 @@ function issue(response) {
 }
 
 function comment(comment) {
-  const created = comment.created_at
+  const {
+    created_at: created,
+    updated_at: updated,
+    id,
+    user: u,
+  } = comment
   return [
-    `${dim('#' + comment.id)} ${user(comment.user)}\
-    ${dim(time(created))}`,
+    [
+      id && `${dim('#' + comment.id)}`,
+      u && user(u),
+      updated && created !== updated
+        ? dim(`\nCreated: ${created}    Updated: ${updated}`)
+        : created && dim(time(created)),
+    ].filter(v => v).join('  '),
     body(comment.body),
-  ].map(row => '    ' + row).join('\n')
+  ].filter(v => v).map(row => '  ' + row).join('\n')
 }
 
 module.exports = {

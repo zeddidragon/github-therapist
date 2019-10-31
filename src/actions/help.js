@@ -11,6 +11,10 @@ const helps = {
   comment: newComment,
   m: editComment,
   amend: editComment,
+  C: close,
+  close: close,
+  r: deleteComment,
+  retract: deleteComment,
 }
 
 function help(code = 0) {
@@ -24,26 +28,18 @@ ${description}
 Usage: ${bin} [<flags>] [<command>] [<repo>] [<command arguments>]
 
 Examples:
-  # List all open issues assigned to you in all repos
   ${bin}
-  # List all open issues in my-project
-  ${bin} my-project
-  # List all open issues in my-project assigned to you
-  ${bin} -a my-project
-  # Show one issue
-  ${bin} my-project/1313
-  # Close issue with comment
-  ${bin} 1313 -C "k done"
-  # Comment on issue
-  ${bin} 1313 -c "Let's talk about this tomorrow"
-  # Re-open issue with comment
-  ${bin} 1313 -O "I made a mistake"
-
-Flags:
-  -b, --body    include issue body in the list
-  -e, --editor  opens your editor to write the body of the issue/comment
-  -a, --assign  assign a user when creating issue
-  -l, --label   add label when creating issue
+  Lists all open issues assigned to you in all repos
+  ${bin} my/project
+  Lists all open issues in my/project
+  ${bin} my/project 1313
+  Shows issue 1313 in my/project an its comments
+  ${bin} C 1313 "k done"
+  Closes issue in default repo with comment
+  ${bin} c 1313 "Let's talk about this tomorrow"
+  Comment on issue in default repo
+  ${bin} c -O 1313 "I made a mistake"
+  Re-opens issue with comment
 
 Commands:
   h, help       This help message
@@ -92,7 +88,7 @@ Example:
   Opens up an editor to fill in the body
 
 Flags:
-  -e, --editor          opens your editor to write the body of the issue/comment
+  -e, --editor          opens your editor to write the body of the issue
   -t, --title <title>   set title of issue
   -b, --body <body>     set body of issue
   -a, --assign <user>   assign a user when creating issue
@@ -113,7 +109,7 @@ Example:
   Opens up an editor to fill in the body
 
 Flags:
-  -e, --editor          opens your editor to write the body of the issue/comment
+  -e, --editor          opens your editor to write the body of the issue
   -t, --title <title>   set title of issue
   -b, --body <body>     set body of issue
   -a, --assign <user>   assign a user when creating issue
@@ -132,12 +128,12 @@ Usage: ${bin} c[comment] [<repo>] <issue> [<body>]
 
 Example:
   $ ${bin} comment bucks 1313 "Cannot reproduce"
-  $ ${bin} comment bucks 1313
+  $ ${bin} c bucks 1313
   Opens up an editor to fill in the body
 
 Flags:
-  -e, --editor          opens your editor to write the body of the issue/comment
-  -b, --body <body>     set body of issue
+  -e, --editor          opens your editor to write the body of the comment
+  -b, --body <body>     set body of comment
   -C, --close           close issue, -O will override it
   -O, --open            reopen issue, -C will override it`)
   process.exit(code)
@@ -147,18 +143,55 @@ function editComment(code = 0) {
   const { bin } = pkg
   console.log(`
 Usage: ${bin} [a]m[end] [<repo>] <issue> [<body>]
+  The latest comment you've written will be selected.
   If you don't specify any body, your editor opens.
 
 Example:
-  $ ${bin} comment bucks 1313 "Cannot reproduce"
-  $ ${bin} comment bucks 1313
+  $ ${bin} comment bucks 1313 "nvm I can reproduce, will fix"
+  $ ${bin} c bucks 1313
   Opens up an editor to fill in the body
 
 Flags:
-  -e, --editor          opens your editor to write the body of the issue/comment
-  -b, --body <body>     set body of issue
+  -e, --editor          opens your editor to write the body of the comment
+  -b, --body <body>     set body of comment
   -C, --close           close issue, -O will override it
-  -O, --open            reopen issue, -C will override it`)
+  -O, --open            reopen issue, -C will override it
+  -i, --id              edit specific comment rather than latest one`)
+  
+  process.exit(code)
+}
+
+function deleteComment(code = 0) {
+  const { bin } = pkg
+  console.log(`
+Usage: ${bin} r[etract] [<repo>] <issue> [<id>]
+  Delete your latest comment or the specified one.
+
+Example:
+  $ ${bin} close bucks 1313 "nvm I can reproduce, will fix"
+  $ ${bin} C bucks 1313
+
+Flags:
+  -i, --id              retract specific comment rather than latest one`)
+  
+  process.exit(code)
+}
+
+function close(code = 0) {
+  const { bin } = pkg
+  console.log(`
+Usage: ${bin} close|C [<repo>] <issue> [<body>]
+  Close issue, optionally with a comment.
+
+Example:
+  $ ${bin} close bucks 1313 "nvm I can reproduce, will fix"
+  $ ${bin} C bucks 1313
+
+Flags:
+  -e, --editor          opens your editor to write the body of the comment
+  -b, --body <body>     set body of comment
+  -C, --close           close issue, -O will override it`)
+  
   process.exit(code)
 }
 
@@ -170,6 +203,8 @@ Object.assign(help, {
   editIssue,
   newComment,
   editComment,
+  deleteComment,
+  close,
 })
 
 module.exports = help

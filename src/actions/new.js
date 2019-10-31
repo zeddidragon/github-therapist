@@ -1,4 +1,3 @@
-const path = require('path')
 const { dim, cyan } = require('kleur')
 const prompts = require('prompts')
 const raise = require('../error')
@@ -11,13 +10,12 @@ const { flags } = require('../config')
 async function newIssue(args) {
   const issue = {
     title: args[1] || flags.title,
-    body: args[2] || flags.message || '',
+    body: args[2] || flags.body || '',
     assignees: flags.assign || [],
     labels: flags.label || [],
   }
   if(flags.editor || !issue.title) {
     Object.assign(issue, await editIssue(issue))
-    console.log(issue)
     delete issue.state
     if(!issue.assignees.length) delete issue.assignees
     if(!issue.labels.length) delete issue.labels
@@ -28,7 +26,7 @@ async function newIssue(args) {
     raise('Title not provided!')
   }
 
-  const repo = resolve(args[0] || 'default')
+  const repo = resolve(args[0])
 
   console.log(`${dim('In repo:')} ${cyan(repo)}\n${formatIssue(issue)}`)
   const { ok } = await prompts({
@@ -42,7 +40,8 @@ async function newIssue(args) {
     process.exit(0)
   }
 
-  const response = await post(path.join('repos', repo, 'issues'), issue)
+  const url = `/repos/${repo}/issues`
+  const response = await post(url, issue)
   console.log(formatIssue(response))
 }
 
@@ -61,7 +60,7 @@ async function getOriginal(url) {
 
 async function patchIssue(args) {
   const [repo, issue] = resolveArgs(args)
-  const url = path.join('repos', repo, 'issues', issue)
+  const url = `/repos/${repo}/issues/${issue}`
   var original = null
   const edits = {}
   for(const flag of ['title', 'body', 'milestone']) {

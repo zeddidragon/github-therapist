@@ -51,8 +51,30 @@ async function post(path, body={}, opts={}) {
   return response.json()
 }
 
+function destroy(path, opts={}) {
+  const url = new URL(path, apiUrl)
+  return fetch(url, {
+    method: 'DELETE',
+    ...opts,
+    headers: {
+      ...apiHeaders,
+      ...(opts.headers || {}),
+    }
+  })
+}
+
+function getIssue(repo, issue) {
+
+  return Promise.all([
+    get(`/repos/${repo}/issues/${issue}`),
+    get(`/repos/${repo}/issues/${issue}/comments`),
+  ])
+}
+
 module.exports = {
   get,
   post,
+  destroy,
   apiHeaders,
+  getIssue,
 }

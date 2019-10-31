@@ -13,6 +13,10 @@ async function parseCli() {
 
   const args = processArgs()
   const [command, ...cmdArgs] = args
+  const repoArgs = cmdArgs.slice()
+  if(!repoArgs[0] || /^\d+$/.test(repoArgs[0])) {
+    repoArgs.unshift('default')
+  }
 
   if(flags.help) return actions.help(args[0])
   switch(command) {
@@ -24,16 +28,22 @@ async function parseCli() {
       return actions.alias(cmdArgs)
     case 'new':
     case 'n':
-      return actions.new(cmdArgs)
+      return actions.new(repoArgs)
     case 'edit':
     case 'e':
-      return actions.edit(cmdArgs)
+      return actions.edit(repoArgs)
     case 'comment':
     case 'c':
-      return actions.comment(cmdArgs)
+      return actions.comment(repoArgs)
+    case 'amend':
+    case 'm':
+      return actions.amend(cmdArgs)
     case 'close':
-    case 'c':
+    case 'C':
       return actions.close(cmdArgs)
+    case 'retract':
+    case 'r':
+      return actions.retract(cmdArgs)
   }
 
   return actions.issues(args)

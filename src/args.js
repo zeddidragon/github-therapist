@@ -10,6 +10,7 @@ const flagMap = {
   m: 'milestone',
   C: 'close',
   O: 'open',
+  i: 'id',
 }
 
 const flagTypes = {

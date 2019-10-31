@@ -1,10 +1,9 @@
-const path = require('path')
 const { issue: formatIssue, issueRow, comment } = require('../format')
-const { get } = require('../http')
+const { get, getIssue } = require('../http')
 const { resolveArgs } = require('./alias')
 
 async function list(repo) {
-  const url = repo ? path.join('repos', repo, 'issues') : '/issues'
+  const url = repo ? `/repos/${repo}/issues` : '/issues'
   const response = await get(url)
   console.log(response.map(issueRow).join('\n\n'))
   if(!response.length) {
@@ -14,12 +13,11 @@ async function list(repo) {
 
 async function show(repo, issue) {
   console.log(`Fetching ${repo} #${issue}`)
-  const [response, comments] = await Promise.all([
-    get(path.join('repos', repo, 'issues', issue)),
-    get(path.join('repos', repo, 'issues', issue, 'comments')),
-  ])
-
-  const output = formatIssue(response) + comments.map(comment).join('\n\n')
+  const [response, comments] = await getIssue(repo, issue)
+  const output = [
+    formatIssue(response),
+    ...comments.map(comment)
+  ].join('\n\n')
   console.log(output)
 }
 
@@ -31,4 +29,5 @@ function issues(args) {
   return list(repo)
 }
 
+issues.getIssue = getIssue
 module.exports = issues

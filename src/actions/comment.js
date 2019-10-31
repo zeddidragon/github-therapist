@@ -1,93 +1,101 @@
-const path = require('path')
-const { dim, cyan } = require('kleur')
+const { dim, cyan, red, green } = require('kleur')
 const prompts = require('prompts')
 const raise = require('../error')
-const { issue: formatIssue } = require('../format')
-const { get, post } = require('../http')
+const { comment: formatComment } = require('../format')
+const { get, post, destroy, getIssue } = require('../http')
 const { resolve, resolveArgs } = require('./alias')
-const { editIssue } = require('./editor')
+const { editComment } = require('./editor')
 const { flags } = require('../config')
 
-async function newComment(args) {
-  const issue = {
-    title: args[1] || flags.title,
-    body: args[2] || flags.message || '',
-    assignees: flags.assign || [],
-    labels: flags.label || [],
-  }
-  if(flags.editor || !issue.title) {
-    Object.assign(issue, await editIssue(issue))
-    console.log(issue)
-    delete issue.state
-    if(!issue.assignees.length) delete issue.assignees
-    if(!issue.labels.length) delete issue.labels
-    if(!issue.body) delete issue.body
-    if(!issue.milestone) delete issue.milestone
-  }
-  if(!issue.title) {
-    raise('Title not provided!')
-  }
-
-  const repo = resolve(args[0] || 'default')
-
-  console.log(`${dim('In repo:')} ${cyan(repo)}\n${formatIssue(issue)}`)
-  const { ok } = await prompts({
-    type: 'confirm',
-    name: 'ok',
-    message: 'Is this correct?',
-    initial: true,
-  })
-  if(!ok) {
-    console.error('Aborted')
-    process.exit(0)
-  }
-
-  const response = await post(path.join('repos', repo, 'issues'), issue)
-  console.log(formatIssue(response))
-}
-
-async function getOriginal(url) {
-  const original = await get(url)
-  return {
-    title: original.title,
-    body: original.body,
-    user: original.user.login,
-    milestone: original.milestone || '',
-    assignees: original.labels.map(a => a.login),
-    labels: original.labels.map(l => l.name),
-    state: original.state,
-  }
-}
-
-async function patchIssue(args) {
-  const [repo, issue] = resolveArgs(args)
-  const url = path.join('repos', repo, 'issues', issue)
-  var original = null
-  const edits = {}
-  for(const flag of ['title', 'body', 'milestone']) {
-    const v = flags[flag]
-    if(!v) continue
-    edits[flag] = v
-  }
-  for(const [flag, prop] of [['assign', 'assignees'], ['label', 'labels']]) {
-    const v = flags[flag]
-    if(!v) continue
-    if(!original) original = await getOriginal(url)
-    edits[prop] = Array.from(new Set(original.prop.concat(v)))
-  }
+async function maybeClose(repo, issue) {
   if(flags.close || flags.open) {
-    edits.state = flags.close ? 'closed' : 'open'
+    const state = flags.close ? 'closed' : 'open'
+    const url = `/repos/${repo}/issues/${issue}`
+    await post(url, { state }, { method: 'PATCH' })
+    console.log(`Issue ${flags.close ? red('closed') : green('opened')}`)
   }
-  if(flags.editor || !Object.keys(edits).length) {
-    if(!original) original = await getOriginal(url)
-    Object.assign(edits, await editIssue(Object.assign(original, edits)))
-    if(!edits.milestone) edits.milestone = null
-  }
-
-  const response = await post(url, edits, { method: 'PATCH' })
-  console.log(formatIssue(response))
 }
 
-newIssue.editIssue = patchIssue
+async function newComment(args) {
+  const comment = { body: args[2] || flags.body || '' }
+  const [repo, issue] = resolveArgs(args)
 
-module.exports = newIssue
+  if(flags.editor || !comment.body) {
+    const [main, comments] = await getIssue(repo, issue)
+    Object.assign(comment, await editComment(comment, main, comments))
+  }
+
+  if(!comment.body) {
+    raise('Body not provided!')
+  }
+
+  console.log(`${dim('In repo:')} ${cyan(repo)}\n${formatComment(comment)}`)
+
+  const url = `/repos/${repo}/issues/${issue}/comments`
+  const response = await post(url, comment)
+  await maybeClose(repo, issue)
+  console.log(formatComment(response))
+}
+
+function getComment(comments, repo, issue) {
+  const comment = flags.id
+    ? comments.find(c => c.id === +flags.id)
+    : comments.filter(c => c.author_association = 'OWNER').pop()
+
+  if(!comment && flags.id) {
+    raise(`No comment found in ${repo} #${issue} with id ${flags.id}`)
+  } else if(!comment) {
+    raise(`No comment by you found in  ${repo} #${issue}`)
+  }
+
+  return comment
+}
+
+async function patchComment(args) {
+  const [repo, issue] = resolveArgs(args)
+  const [main, comments] = await getIssue(repo, issue)
+  const comment = getComment(comment)
+
+  const changes = {
+    body: args[2] || flags.body,
+  }
+
+  if(flags.editor || !changes.body) {
+    changes.body = comment.body
+    Object.assign(changes, await editComment(changes, main, comments))
+  }
+
+  const url = `/repos/${repo}/issues/comments/${comment.id}`
+  const response = await post(url, changes, { method: 'patch'})
+  await maybeClose(repo, issue)
+  console.log(formatComment(response))
+}
+
+async function close(args) {
+  flags.close = true
+  if(args.length || flags.body) return newComment(args)
+
+  const [repo, issue] = resolveArgs(args)
+  return maybeClose(repo, issue)
+}
+
+async function deleteComment(args) {
+  const [repo, issue] = resolveArgs(args)
+
+  var id = args[3] || flags.id
+  if(!id) {
+    const url = `/repos/${repo}/issues/${issue}/comments`
+    const comments = await get(url)
+    id = getComment(comments).id
+  }
+
+  const url = `/repos/${repo}/issues/comments/${id}`
+  await destroy(url, {}, { method: 'DELETE' })
+  console.log(`Issue ${cyan(id)} deleted`)
+}
+
+newComment.editComment = patchComment
+newComment.close = close
+newComment.deleteComment = deleteComment
+
+module.exports = newComment
