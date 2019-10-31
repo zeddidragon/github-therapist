@@ -3,7 +3,7 @@
   "bin": {
     "gth": "src/index.js"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Helps you with your GH issues",
   "main": "src/index.js",
   "scripts": {
