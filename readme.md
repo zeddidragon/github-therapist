@@ -7,7 +7,7 @@ Small program to manage your github issues.
 `npm i -g github-therapist`
 or
 ```
-  git clone git@github.com:zeddidragon/github-therapist.git`
+  git clone git@github.com:zeddidragon/github-therapist.git
   cd github-therapist
   npm link
 ```
