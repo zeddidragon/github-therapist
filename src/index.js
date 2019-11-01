@@ -29,6 +29,8 @@ async function parseCli() {
     case 'alias':
     case 'a':
       return actions.alias(cmdArgs)
+    case 'nick':
+      return actions.nick(cmdArgs)
     case 'new':
     case 'n':
       return actions.new(repoArgs)

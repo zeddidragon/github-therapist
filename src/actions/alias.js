@@ -3,10 +3,10 @@ const { config, addConfig } = require('../config')
 const { aliases: help } = require('./help')
 const raise = require('../error')
 
-function list(highlight) {
-  const aliases = Object.entries(config.aliases || {})
+function list(prop, highlight) {
+  const aliases = Object.entries(config[prop] || {})
   if(!aliases.length) {
-    console.log('You have no aliases')
+    console.log(`You have no ${prop}`)
     return help()
   }
 
@@ -15,6 +15,14 @@ function list(highlight) {
     const str = `${k.padStart(max)} => ${v}`
     return highlight === k ? yellow(str) : str
   }).join('\n'))
+}
+
+function listAliases(highlight) {
+  return list('aliases', highlight)
+}
+
+function listNicks(highlight) {
+  return list('nicks', highlight)
 }
 
 const reserved = [
@@ -26,7 +34,26 @@ const reserved = [
   'c',
   'C',
 ]
-function add(symbol, repo) {
+
+function add(prop, symbol, linked) {
+  const single = {
+    aliases: 'alias',
+    nicks: 'nick',
+  }[prop]
+  if(!linked) raise(`No ${single} specified`)
+  const aliases = config[prop] || {}
+  if(symbol === 'clear') {
+    delete aliases[linked]
+    addConfig({ [prop]: aliases })
+    console.log(`Cleared ${single} ${linked}`)
+    process.exit(0)
+  }
+
+  aliases[symbol] = linked
+  addConfig({ [prop]: aliases })
+}
+
+function addAlias(symbol, repo) {
   if(reserved.includes(symbol)) {
     raise(`Cannot alias reserved token:  ${symbol}
 The following tokens are reserved: \n  ${reserved.join(', ')}`)
@@ -35,28 +62,23 @@ The following tokens are reserved: \n  ${reserved.join(', ')}`)
     raise(`Alias cant not contain slashes:  ${symbol}`)
   }
 
-  const aliases = config.aliases || {}
-  if(symbol === 'clear') {
-    if(!repo) repo = 'default'
-    delete aliases[repo]
-    addConfig({ aliases })
-    return console.log(`Cleared alias ${repo}`)
-  }
+  add('aliases', symbol, repo)
+  listAliases(symbol)
+}
 
-  if(!repo) {
-    console.error('No repo specified')
-    return help(1)
-  }
-
-  aliases[symbol] = repo
-
-  addConfig({ aliases })
-  return list(symbol)
+function addNick(symbol, user) {
+  add('nicks', symbol, user)
+  listNicks(symbol)
 }
 
 function alias(args) {
-  if(!args.length) return list()
-  return add(...args)
+  if(!args.length) return listAliases()
+  return addAlias(...args)
+}
+
+function nick(args) {
+  if(!args.length) return listNicks()
+  return addNick(...args)
 }
 
 function resolve(repo) {
@@ -84,7 +106,14 @@ function resolveArgs([repo, issue]) {
   return [repo, issue]
 }
 
+function resolveNick(nick) {
+  const nicks = config.nicks || {}
+  return nicks[nick] || nick
+}
+
 alias.resolve = resolve
 alias.resolveArgs = resolveArgs
+alias.resolveNick = resolveNick
+alias.nick = nick
 
 module.exports = alias

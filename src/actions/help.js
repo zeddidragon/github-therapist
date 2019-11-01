@@ -2,6 +2,7 @@ const { pkg } = require('../config')
 const helps = {
   a: aliases,
   aliases: aliases,
+  nick: nicks,
   n: newIssue,
   new: newIssue,
   e: editIssue,
@@ -73,6 +74,23 @@ Example:
     > https://github.com/microbucks/corporate-project/issues/1500
     > ...
   $ ${bin} a clear default`)
+  process.exit(code)
+}
+
+function nicks(code = 0) {
+  const { bin } = pkg
+  console.log(`
+Usage: ${bin} nick [<nickname> <full name>]
+Example:
+  $ ${bin} nick me octocat
+  $ ${bin} nick
+    > me => octocat
+  $ ${bin} bucks 1500 -a me
+    > https://github.com/microbucks/corporate-project/issues/1500
+    > ...
+    > By: @octocat  To: @octocat
+    > ...
+  $ ${bin} nick clear me`)
   process.exit(code)
 }
 

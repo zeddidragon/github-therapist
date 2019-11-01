@@ -7,6 +7,7 @@ const help = require('./help')
 module.exports = {
   issues: issues,
   alias: alias,
+  nick: alias.nick,
   new: newIssue,
   edit: newIssue.editIssue,
   help: help,

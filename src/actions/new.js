@@ -3,7 +3,7 @@ const prompts = require('prompts')
 const raise = require('../error')
 const { issue: formatIssue } = require('../format')
 const { get, post } = require('../http')
-const { resolve, resolveArgs } = require('./alias')
+const { resolve, resolveArgs, resolveNick } = require('./alias')
 const { editIssue } = require('./editor')
 const { flags } = require('../config')
 
@@ -41,6 +41,9 @@ async function newIssue(args) {
   }
 
   const url = `/repos/${repo}/issues`
+  if(issue.assignees) {
+    issue.assignees = issue.assignees.map(resolveNick)
+  }
   const response = await post(url, issue)
   console.log(formatIssue(response))
 }
@@ -76,6 +79,7 @@ async function patchIssue(args) {
   }
   if(flags.unassign) {
     if(!original) original = await getOriginal(url)
+    flags.unassign = flags.unassign.map(resolveNick)
     edits.assignees = (edits.assignees || original.assignees)
       .filter(login => !flags.unassign.includes(login))
   }
@@ -88,6 +92,9 @@ async function patchIssue(args) {
     if(!edits.milestone) edits.milestone = null
   }
 
+  if(edits.assignees) {
+    edits.assignees = edits.assignees.map(resolveNick)
+  }
   const response = await post(url, edits, { method: 'PATCH' })
   console.log(formatIssue(response))
 }
