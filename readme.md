@@ -62,6 +62,22 @@ Example:
   $ gth a clear default
 ```
 
+## Nicks
+These are aliases for users, used when assigning and unassigning users.
+```
+Usage: gth nick [<nickname> <full name>]
+Example:
+  $ gth nick me octocat
+  $ gth nick
+    > me => octocat
+  $ gth bucks 1500 -a me
+    > https://github.com/microbucks/corporate-project/issues/1500
+    > ...
+    > By: @octocat  To: @octocat
+    > ...
+  $ gth nick clear me
+```
+
 ## New issue
 ```
 Usage: gth n[ew] [<repo>] [<title>] [<body>]
@@ -96,8 +112,10 @@ Flags:
   -e, --editor          opens your editor to write the body of the issue
   -t, --title <title>   set title of issue
   -b, --body <body>     set body of issue
-  -a, --assign <user>   assign a user when creating issue
-  -l, --label <label>   add label when creating issue
+  -a, --assign <user>   assign a user
+  -A, --unassign <user> unassign a user
+  -l, --label <label>   add label
+  -L, --unlabel <label> remove label
   -m, --milestone <id>  set milestone id
   -C, --close           close issue, -O will override it
   -O, --open            reopen issue, -C will override it

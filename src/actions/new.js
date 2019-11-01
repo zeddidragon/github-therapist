@@ -72,16 +72,19 @@ async function patchIssue(args) {
     edits[flag] = v
   }
   for(const [flag, prop] of [['assign', 'assignees'], ['label', 'labels']]) {
-    const v = flags[flag]
+    let v = flags[flag]
     if(!v) continue
+    if(flag === 'assign') v = v.map(resolveNick)
     if(!original) original = await getOriginal(url)
     edits[prop] = Array.from(new Set(original[prop].concat(v)))
   }
-  if(flags.unassign) {
+  for(const [flag, prop] of [['unassign', 'assignees'], ['unlabel', 'labels']]) {
+    let v = flags[flag]
+    if(!v) continue
+    if(flag === 'unassign') v = v.map(resolveNick)
     if(!original) original = await getOriginal(url)
-    flags.unassign = flags.unassign.map(resolveNick)
-    edits.assignees = (edits.assignees || original.assignees)
-      .filter(login => !flags.unassign.includes(login))
+    edits[prop] = (edits[prop] || original[prop])
+      .filter(e => !v.includes(e))
   }
   if(flags.close || flags.open) {
     edits.state = flags.close ? 'closed' : 'open'

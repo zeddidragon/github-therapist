@@ -6,8 +6,9 @@ const flagMap = {
   t: 'title',
   b: 'body',
   a: 'assign',
-  u: 'unassign',
+  A: 'unassign',
   l: 'label',
+  L: 'unlabel',
   m: 'milestone',
   C: 'close',
   O: 'open',
@@ -18,6 +19,7 @@ const flagTypes = {
   assign: Array,
   unassign: Array,
   label: Array,
+  unlabel: Array,
   body: String,
   milestone: Number,
 }
