@@ -52,7 +52,7 @@ async function getOriginal(url) {
     body: original.body,
     user: original.user.login,
     milestone: original.milestone || '',
-    assignees: original.labels.map(a => a.login),
+    assignees: original.assignees.map(a => a.login),
     labels: original.labels.map(l => l.name),
     state: original.state,
   }
@@ -72,14 +72,19 @@ async function patchIssue(args) {
     const v = flags[flag]
     if(!v) continue
     if(!original) original = await getOriginal(url)
-    edits[prop] = Array.from(new Set(original.prop.concat(v)))
+    edits[prop] = Array.from(new Set(original[prop].concat(v)))
+  }
+  if(flags.unassign) {
+    if(!original) original = await getOriginal(url)
+    edits.assignees = (edits.assignees || original.assignees)
+      .filter(login => !flags.unassign.includes(login))
   }
   if(flags.close || flags.open) {
     edits.state = flags.close ? 'closed' : 'open'
   }
   if(flags.editor || !Object.keys(edits).length) {
     if(!original) original = await getOriginal(url)
-    Object.assign(edits, await editIssue(Object.assign(original, edits)))
+    Object.assign(edits, await editIssue(Object.assign({}, original, edits)))
     if(!edits.milestone) edits.milestone = null
   }
 
