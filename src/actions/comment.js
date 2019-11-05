@@ -54,7 +54,7 @@ function getComment(comments, repo, issue) {
 async function patchComment(args) {
   const [repo, issue] = resolveArgs(args)
   const [main, comments] = await getIssue(repo, issue)
-  const comment = getComment(comment)
+  const comment = getComment(comments)
 
   const changes = {
     body: args[2] || flags.body,
