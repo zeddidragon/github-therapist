@@ -8,12 +8,10 @@ const { editComment } = require('./editor')
 const { flags } = require('../config')
 
 async function maybeClose(repo, issue) {
-  if(flags.close || flags.open) {
-    const state = flags.close ? 'closed' : 'open'
-    const url = `/repos/${repo}/issues/${issue}`
-    await post(url, { state }, { method: 'PATCH' })
-    console.log(`Issue ${flags.close ? red('closed') : green('opened')}`)
-  }
+  if(!(flags.close || flags.open)) return
+  const state = flags.close ? 'closed' : 'open'
+  const url = `/repos/${repo}/issues/${issue}`
+  await post(url, { state }, { method: 'PATCH' })
 }
 
 async function newComment(args) {
@@ -29,7 +27,7 @@ async function newComment(args) {
     raise('Body not provided!')
   }
 
-  console.log(`${dim('In repo:')} ${cyan(repo)}\n${formatComment(comment)}`)
+  console.log(`${dim('In repo:')} ${cyan(repo)}`)
 
   const url = `/repos/${repo}/issues/${issue}/comments`
   const response = await post(url, comment)
