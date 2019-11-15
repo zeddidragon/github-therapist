@@ -25,7 +25,7 @@ async function editIssue(issue) {
 ${issue.body || ''}
 [//] # (Enter your issue message. Lines beginning with \`[//] #\` will be stripped)
 [//] # (The first line is the issue's title)\
-${issue.user ? `\n[//] # Created by @${issue.user}\n` : ''}\
+${issue.user ? `\n[//] # Created by @${issue.user}\n` : ''}
 ${propsHeader}
 state = ${issue.state || 'open'}
 milestone = ${issue.milestone || ''}
@@ -36,7 +36,7 @@ assignees = ${(issue.assignees || []).join(', ')}`
 
   const lines = written.split('\n').map(line => line.trim())
   const propsIndex = lines.indexOf(propsHeader)
-  if(!propsIndex) {
+  if(propsIndex < 0) {
     raise(`Unable to find property header:\n${propsHeader}`)
   }
   const title = lines[0].replace(/^#/, '').trim()
